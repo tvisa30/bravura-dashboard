@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bravura Founder Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#C9A96E" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Bravura" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+</head>
+<body>
+
+  <!-- Login Screen -->
+  <div id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <div class="login-logo">
+        <span class="brand-b">B</span>
+        <div class="brand-text">
+          <span class="brand-name">Bravura</span>
+          <span class="brand-sub">Design Solutions</span>
+        </div>
+      </div>
+      <p class="login-tagline">Crafting spaces and stories through elevated designs since 1997</p>
+      <div class="form-group">
+        <label>Your Name</label>
+        <input id="loginName" placeholder="e.g. Amita or Intern Name" autocomplete="name" />
+      </div>
+      <div class="form-group">
+        <label>Access Code</label>
+        <input id="loginCode" type="password" placeholder="Enter access code" />
+      </div>
+      <div id="loginError" class="login-error" style="display:none">Incorrect access code. Try again.</div>
+      <button class="btn-primary" style="width:100%;margin-top:8px" onclick="attemptLogin()">Enter Dashboard</button>
+      <p class="login-hint">Contact Amita Trehan for the access code.</p>
+    </div>
+  </div>
+
+  <!-- Change Access Code Modal -->
+  <div class="modal-overlay" id="codeModalOverlay">
+    <div class="modal" style="max-width:400px">
+      <div class="modal-header">
+        <h2>Change Access Code</h2>
+        <button class="modal-close" onclick="document.getElementById('codeModalOverlay').classList.remove('open')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group"><label>Current Code</label><input type="password" id="f-old-code"/></div>
+        <div class="form-group"><label>New Code</label><input type="password" id="f-new-code"/></div>
+        <div class="form-group"><label>Confirm New Code</label><input type="password" id="f-confirm-code"/></div>
+        <div id="codeChangeError" style="color:var(--red);font-size:12px;margin-top:4px;display:none"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="document.getElementById('codeModalOverlay').classList.remove('open')">Cancel</button>
+        <button class="btn-primary" onclick="changeAccessCode()">Update Code</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile sidebar overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="brand-logo">
+        <img src="logo.png" class="brand-logo-img" alt="Bravura">
+        <div class="brand-text">
+          <span class="brand-name">Bravura</span>
+          <span class="brand-sub">Design Solutions</span>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-section="overview">
+        <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+        <span>Overview</span>
+      </button>
+      <button class="nav-item" data-section="todos">
+        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+        <span>To-Dos</span>
+      </button>
+      <button class="nav-item" data-section="meetings">
+        <svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
+        <span>Meetings</span>
+      </button>
+      <button class="nav-item amita-only" data-section="calendar">
+        <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+        <span>Content Calendar</span>
+      </button>
+      <button class="nav-item" data-section="media">
+        <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8 12.5v-9l6 4.5-6 4.5z"/></svg>
+        <span>Media Vault</span>
+      </button>
+      <button class="nav-item amita-only" data-section="projects">
+        <svg viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+        <span>Project Archive</span>
+      </button>
+      <button class="nav-item amita-only" data-section="clients">
+        <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+        <span>Client CRM</span>
+      </button>
+      <button class="nav-item amita-only" data-section="speaking">
+        <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+        <span>Speaking & Press</span>
+      </button>
+      <button class="nav-item amita-only" data-section="awards">
+        <svg viewBox="0 0 24 24"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>
+        <span>Awards Tracker</span>
+      </button>
+      <button class="nav-item amita-only" data-section="assets">
+        <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+        <span>Digital Assets</span>
+      </button>
+      <button class="nav-item amita-only" data-section="passwords">
+        <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+        <span>Passwords</span>
+      </button>
+      <button class="nav-item amita-only" data-section="team">
+        <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+        <span>Team</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="founder-tag">
+        <div class="founder-avatar" id="sidebarAvatar">AT</div>
+        <div>
+          <div class="founder-name" id="sidebarName">Amita Trehan</div>
+          <div class="founder-role" id="sidebarRole">Founder & CDO</div>
+        </div>
+      </div>
+      <div class="sidebar-actions">
+        <button class="sidebar-action-btn" onclick="document.getElementById('codeModalOverlay').classList.add('open')" title="Change access code">🔑 Change Code</button>
+        <button class="sidebar-action-btn" onclick="logout()" title="Log out">↩ Log out</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Top Bar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle" id="menuToggle">
+          <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+        </button>
+        <div class="page-title" id="pageTitle">Overview</div>
+      </div>
+      <div class="topbar-right">
+        <div class="date-display" id="dateDisplay"></div>
+        <button class="add-btn" id="addBtn">+ Add New</button>
+      </div>
+    </header>
+
+    <!-- Sections -->
+    <div class="content-area">
+
+      <!-- OVERVIEW -->
+      <section class="section active" id="section-overview">
+        <div class="greeting-banner">
+          <div>
+            <h1 class="greeting" id="greeting">Good morning, Amita</h1>
+            <p class="greeting-sub">Crafting spaces and stories through elevated designs since 1997</p>
+          </div>
+          <div class="stats-row">
+            <div class="stat-pill"><span id="stat-todos">0</span> open tasks</div>
+            <div class="stat-pill"><span id="stat-events">0</span> upcoming events</div>
+            <div class="stat-pill"><span id="stat-projects">0</span> active projects</div>
+          </div>
+        </div>
+
+        <div class="overview-grid">
+          <div class="card card-wide">
+            <div class="card-header">
+              <h3>Today's To-Dos</h3>
+              <button class="card-link" data-goto="todos">View all</button>
+            </div>
+            <div id="overview-todos" class="mini-list">
+              <div class="empty-state">No tasks yet — add your first to-do</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Upcoming Events</h3>
+              <button class="card-link" data-goto="calendar">View all</button>
+            </div>
+            <div id="overview-events" class="mini-list">
+              <div class="empty-state">No upcoming events</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Active Projects</h3>
+              <button class="card-link" data-goto="projects">View all</button>
+            </div>
+            <div id="overview-projects" class="mini-list">
+              <div class="empty-state">No active projects</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Recent Press & Speaking</h3>
+              <button class="card-link" data-goto="speaking">View all</button>
+            </div>
+            <div id="overview-speaking" class="mini-list">
+              <div class="empty-state">No entries yet</div>
+            </div>
+          </div>
+
+          <div class="card metrics-card">
+            <h3>Business at a Glance</h3>
+            <div class="metrics-grid">
+              <div class="metric"><div class="metric-num">700+</div><div class="metric-label">Happy Clients</div></div>
+              <div class="metric"><div class="metric-num">1000+</div><div class="metric-label">Spaces Transformed</div></div>
+              <div class="metric"><div class="metric-num">20+</div><div class="metric-label">Cities Served</div></div>
+              <div class="metric"><div class="metric-num" id="metric-years">29</div><div class="metric-label">Years of Legacy</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TO-DOS -->
+      <section class="section" id="section-todos">
+        <div class="section-toolbar">
+          <div class="filter-tabs">
+            <button class="filter-tab active" data-filter="all">All</button>
+            <button class="filter-tab" data-filter="mine">My Tasks</button>
+            <button class="filter-tab" data-filter="today">Today</button>
+            <button class="filter-tab" data-filter="pending">Pending</button>
+            <button class="filter-tab" data-filter="done">Done</button>
+          </div>
+          <div class="search-box">
+            <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            <input type="text" placeholder="Search tasks..." id="todoSearch" />
+          </div>
+        </div>
+        <div id="todo-list" class="todo-list"></div>
+      </section>
+
+      <!-- CONTENT CALENDAR -->
+      <!-- MEETINGS -->
+      <section class="section" id="section-meetings">
+        <div class="section-toolbar">
+          <div class="filter-tabs">
+            <button class="filter-tab active" data-filter="upcoming">Upcoming</button>
+            <button class="filter-tab" data-filter="all">All</button>
+            <button class="filter-tab" data-filter="past">Past</button>
+          </div>
+        </div>
+        <div id="meeting-list" class="meeting-list"></div>
+      </section>
+
+      <!-- CONTENT CALENDAR (Amita only) -->
+      <section class="section" id="section-calendar">
+        <div class="calendar-layout">
+          <div class="calendar-main">
+            <div class="cal-nav">
+              <button id="prevMonth">&#8249;</button>
+              <h2 id="calMonthYear"></h2>
+              <button id="nextMonth">&#8250;</button>
+            </div>
+            <div class="cal-grid">
+              <div class="cal-day-label">Sun</div>
+              <div class="cal-day-label">Mon</div>
+              <div class="cal-day-label">Tue</div>
+              <div class="cal-day-label">Wed</div>
+              <div class="cal-day-label">Thu</div>
+              <div class="cal-day-label">Fri</div>
+              <div class="cal-day-label">Sat</div>
+            </div>
+            <div id="calDays" class="cal-days-grid"></div>
+          </div>
+          <div class="calendar-sidebar">
+            <h3>Events</h3>
+            <div id="event-list" class="event-list">
+              <div class="empty-state">No events yet</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MEDIA VAULT -->
+      <section class="section" id="section-media">
+        <div class="section-toolbar">
+          <div class="filter-tabs">
+            <button class="filter-tab active" data-filter="sites">📁 Sites</button>
+            <button class="filter-tab" data-filter="all">All Files</button>
+            <button class="filter-tab" data-filter="photo">Photos</button>
+            <button class="filter-tab" data-filter="video">Videos</button>
+            <button class="filter-tab" data-filter="document">Documents</button>
+          </div>
+          <div id="media-add-btn-wrap"></div>
+        </div>
+        <!-- Sites hierarchy view -->
+        <div id="sites-view" class="sites-view"></div>
+        <!-- Regular grid view -->
+        <div id="media-grid" class="media-grid" style="display:none">
+          <div class="empty-state full">No media files yet</div>
+        </div>
+      </section>
+
+      <!-- PROJECTS -->
+      <section class="section" id="section-projects">
+        <div class="section-toolbar">
+          <div class="filter-tabs">
+            <button class="filter-tab active" data-filter="all">All</button>
+            <button class="filter-tab" data-filter="active">Active</button>
+            <button class="filter-tab" data-filter="completed">Completed</button>
+            <button class="filter-tab" data-filter="on-hold">On Hold</button>
+          </div>
+        </div>
+        <div id="project-list" class="project-list">
+          <div class="empty-state full">No projects yet — start your first project</div>
+        </div>
+      </section>
+
+      <!-- CLIENT CRM -->
+      <section class="section" id="section-clients">
+        <div class="section-toolbar">
+          <div class="filter-tabs">
+            <button class="filter-tab active" data-filter="all">All</button>
+            <button class="filter-tab" data-filter="prospect">Prospects</button>
+            <button class="filter-tab" data-filter="active">Active</button>
+            <button class="filter-tab" data-filter="completed">Completed</button>
+            <button class="filter-tab" data-filter="vip">VIP</button>
+          </div>
+          <div class="search-box">
+            <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            <input type="text" placeholder="Search clients..." id="clientSearch" />
+          </div>
+        </div>
+        <div id="client-list" class="client-list">
+          <div class="empty-state full">No clients yet — add your first client</div>
+        </div>
+      </section>
+
+      <!-- SPEAKING & PRESS -->
+      <section class="section" id="section-speaking">
+        <div class="section-toolbar">
+          <div class="filter-tabs">
+            <button class="filter-tab active" data-filter="all">All</button>
+            <button class="filter-tab" data-filter="speaking">Speaking</button>
+            <button class="filter-tab" data-filter="press">Press</button>
+            <button class="filter-tab" data-filter="podcast">Podcast</button>
+            <button class="filter-tab" data-filter="panel">Panel</button>
+          </div>
+        </div>
+        <div id="speaking-list" class="speaking-list">
+          <div class="empty-state full">No entries yet — log your first press or speaking engagement</div>
+        </div>
+      </section>
+
+      <!-- AWARDS -->
+      <section class="section" id="section-awards">
+        <div class="section-toolbar">
+          <div class="filter-tabs">
+            <button class="filter-tab active" data-filter="all">All</button>
+            <button class="filter-tab" data-filter="won">Won</button>
+            <button class="filter-tab" data-filter="nominated">Nominated</button>
+            <button class="filter-tab" data-filter="applied">Applied</button>
+          </div>
+        </div>
+        <div id="awards-list" class="awards-list">
+          <div class="empty-state full">No awards yet — start tracking your recognitions</div>
+        </div>
+      </section>
+
+      <!-- DIGITAL ASSETS -->
+      <section class="section" id="section-assets">
+        <div class="assets-categories">
+          <div class="asset-cat" data-cat="logos">
+            <div class="asset-cat-icon">🎨</div>
+            <div>Logos & Brand</div>
+            <div class="asset-count" id="count-logos">0</div>
+          </div>
+          <div class="asset-cat" data-cat="templates">
+            <div class="asset-cat-icon">📋</div>
+            <div>Templates</div>
+            <div class="asset-count" id="count-templates">0</div>
+          </div>
+          <div class="asset-cat" data-cat="photography">
+            <div class="asset-cat-icon">📷</div>
+            <div>Photography</div>
+            <div class="asset-count" id="count-photography">0</div>
+          </div>
+          <div class="asset-cat" data-cat="social">
+            <div class="asset-cat-icon">📱</div>
+            <div>Social Media</div>
+            <div class="asset-count" id="count-social">0</div>
+          </div>
+          <div class="asset-cat" data-cat="contracts">
+            <div class="asset-cat-icon">📄</div>
+            <div>Contracts</div>
+            <div class="asset-count" id="count-contracts">0</div>
+          </div>
+          <div class="asset-cat" data-cat="presentations">
+            <div class="asset-cat-icon">🖼️</div>
+            <div>Presentations</div>
+            <div class="asset-count" id="count-presentations">0</div>
+          </div>
+        </div>
+        <div id="assets-list" class="assets-list">
+          <div class="empty-state full">No digital assets yet — add your first asset</div>
+        </div>
+      </section>
+
+      <!-- TEAM -->
+      <section class="section" id="section-team">
+        <div class="team-header-bar">
+          <p class="team-subtitle">Add team members here. Their names will appear in the To-Do assign list automatically.</p>
+          <button class="btn btn-primary" onclick="openAddMemberModal()">+ Add Member</button>
+        </div>
+        <div id="team-list" class="team-list"></div>
+      </section>
+
+      <!-- PASSWORDS -->
+      <section class="section" id="section-passwords">
+        <div class="password-warning">
+          <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+          <span>For security, store passwords in a dedicated password manager (1Password, Bitwarden). This section stores reference notes only — never paste actual passwords here.</span>
+        </div>
+        <div id="password-list" class="password-list">
+          <div class="empty-state full">No entries yet — add platform access notes</div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Universal Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <h2 id="modalTitle">Add New</h2>
+        <button class="modal-close" id="modalClose">&times;</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="modalCancel">Cancel</button>
+        <button class="btn-primary" id="modalSave">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').then(reg => {
+          console.log('SW registered:', reg.scope);
+        }).catch(err => console.log('SW failed:', err));
+      });
+    }
+  </script>
+</body>
+</html>
