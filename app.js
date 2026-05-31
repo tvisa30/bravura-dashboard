@@ -102,7 +102,6 @@ async function initOneSignal(username) {
         serviceWorkerParam: { scope: '/' },
         notifyButton: { enable: false },
       });
-      await OneSignal.Slidedown.promptPush();
       // Tag this device with the username so we can target them
       await OneSignal.User.addTag('username', username.toLowerCase().trim());
     });
