@@ -96,6 +96,17 @@ function attemptLogin() {
 function initOneSignal(username) { /* push notifications disabled */ }
 async function sendPushNotification(assignedTo, taskTitle) { /* push notifications disabled */ }
 
+// Unregister any old OneSignal or stale service workers
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    regs.forEach(reg => {
+      if (reg.active && reg.active.scriptURL && reg.active.scriptURL.includes('OneSignal')) {
+        reg.unregister();
+      }
+    });
+  });
+}
+
 function logout() {
   localStorage.removeItem('bravura_session');
   currentUser = null;
