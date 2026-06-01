@@ -93,18 +93,36 @@ function attemptLogin() {
   setTimeout(checkAndNotifyNewTasks, 1500);
 }
 
-function initOneSignal(username) { /* push notifications disabled */ }
-async function sendPushNotification(assignedTo, taskTitle) { /* push notifications disabled */ }
-
-// Unregister any old OneSignal or stale service workers
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(regs => {
-    regs.forEach(reg => {
-      if (reg.active && reg.active.scriptURL && reg.active.scriptURL.includes('OneSignal')) {
-        reg.unregister();
-      }
+async function initOneSignal(username) {
+  try {
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+      await OneSignal.init({
+        appId: '7aa214c5-eab1-475b-abb8-8e213bed128a',
+        serviceWorkerParam: { scope: '/' },
+        notifyButton: { enable: false },
+      });
+      await OneSignal.User.addTag('username', username.toLowerCase().trim());
     });
-  });
+  } catch(e) { console.log('OneSignal init error:', e); }
+}
+
+async function sendPushNotification(assignedTo, taskTitle) {
+  try {
+    await fetch('https://onesignal.com/api/v1/notifications', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Basic os_v2_app_pkrbjrpkwfdvxk5yryqtx3isrlnwpdze5wsur7ecwymzscqmry2n3cfsbra2icxpmhmjpvfjpgdwl32nmw5prkarqbbbo6hbnhql57i'
+      },
+      body: JSON.stringify({
+        app_id: '7aa214c5-eab1-475b-abb8-8e213bed128a',
+        filters: [{ field: 'tag', key: 'username', relation: '=', value: assignedTo.toLowerCase().trim() }],
+        headings: { en: 'New Task Assigned' },
+        contents: { en: `${currentUser} assigned you: ${taskTitle}` },
+      })
+    });
+  } catch(e) { console.log('Push notification error:', e); }
 }
 
 function logout() {
